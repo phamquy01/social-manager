@@ -3,12 +3,14 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/lib/contexts/theme-context';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 export function Header() {
   const { isDarkMode, currentTheme } = useTheme();
-
-  const mockConnectedAccounts = 3;
-
+  const t = useTranslations();
+  const mockConnectedAccounts = 0;
+  const router = useRouter();
   return (
     <>
       <header
@@ -28,7 +30,7 @@ export function Header() {
                   : 'bg-green-50 text-green-700 border-green-200'
               }`}
             >
-              {mockConnectedAccounts} tài khoản
+              {mockConnectedAccounts} {t('connected-account')}
             </Badge>
             <div className="flex items-center space-x-2">
               <Button
@@ -38,13 +40,19 @@ export function Header() {
                     ? 'bg-gray-700 border-gray-600'
                     : 'bg-white/50 border-white/20'
                 } shadow-md`}
+                onClick={() => {
+                  router.push('/register');
+                }}
               >
-                Đăng ký
+                {t('register-title')}
               </Button>
               <Button
                 className={`${currentTheme.gradient} ${currentTheme.hover} shadow-lg`}
+                onClick={() => {
+                  router.push('/login');
+                }}
               >
-                Đăng nhập
+                {t('login-title')}
               </Button>
             </div>
           </div>

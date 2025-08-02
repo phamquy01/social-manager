@@ -1,6 +1,7 @@
 {
   "login-title": "Login",
   "register-title": "Register",
+  "connected-account": "account",
   "forgot-password-title": "Forgot Password",
   "reset-password-title": "Reset Password",
   "dashboard": "Dashboard",

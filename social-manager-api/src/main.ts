@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { ValidationError } from 'class-validator';
+
+import { ResponseInterceptor } from 'src/common/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.useGlobalInterceptors(new ResponseInterceptor());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -13,18 +18,23 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true,
       },
+      exceptionFactory: (validationErrors: ValidationError[] = []) => {
+        return new BadRequestException(
+          validationErrors.map((error) => ({
+            [error.property]: Object.values(error.constraints || {}),
+          })),
+        );
+      },
     }),
   );
 
-  // Enable CORS for all origins
   app.enableCors({
-    origin: '*',
+    origin: 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Accept',
     credentials: true,
   });
 
-  // Set global prefix for API routes
   app.setGlobalPrefix('api');
 
   await app.listen(8080, () => {

@@ -17,9 +17,10 @@ export class AuthService {
 
   async login(user: any) {
     const payload = { email: user.email, sub: user.id };
+    const userInfo = await this.userService.findByEmail(user.email);
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: process.env.JWT_REFRESH_TOKEN_EXPRISE,
+      expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES,
     });
 
     await this.saveRefreshToken(refreshToken, user.id);
@@ -27,6 +28,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
+      user: { ...userInfo, password: undefined },
     };
   }
 
@@ -55,8 +57,6 @@ export class AuthService {
         tokenRecord.refresh_token,
       );
       if (isMatch) {
-        // Trả về thông tin user (bỏ password nếu có)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...userInfo } = tokenRecord.user;
         return userInfo;
       }

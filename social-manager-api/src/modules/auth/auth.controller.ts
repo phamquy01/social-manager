@@ -22,13 +22,12 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
-    return this.userService.createUser(registerDto);
+    return await this.userService.createUser(registerDto);
   }
-
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(@Request() request: any) {
-    return this.authService.login(request.user);
+  async login(@Request() request: any) {
+    return await this.authService.login(request.user);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -1,9 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/modules/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
+import { ApiResponse } from 'src/common/api-response';
 
 @Injectable()
 export class UserService {
@@ -14,16 +20,28 @@ export class UserService {
     private readonly refreshTokenRepository: Repository<RefreshToken>,
   ) {}
 
-  createUser(userData: Partial<User>): Promise<User> {
-    const newUser = this.userRepository.create(userData);
-    newUser.createdAt = new Date();
-    newUser.updatedAt = new Date();
-    if (!userData.password) {
-      throw new Error('Password is required to create a user.');
+  async createUser(userData: Partial<User>) {
+    const { email, password } = userData;
+
+    if (!email || !password) {
+      throw new BadRequestException('Email and password are required');
     }
-    const hashedPassword = bcrypt.hashSync(userData.password, 10);
-    newUser.password = hashedPassword;
-    return this.userRepository.save(newUser);
+
+    const exists = await this.userRepository.exist({ where: { email } });
+    if (exists) {
+      throw new BadRequestException('Email already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = this.userRepository.create({
+      ...userData,
+      password: hashedPassword,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await this.userRepository.save(user);
+
+    return 'Register successful'; // <-- chỉ trả về string
   }
 
   findByEmail(email: string) {
