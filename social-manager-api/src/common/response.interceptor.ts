@@ -25,11 +25,11 @@ export class ResponseInterceptor implements NestInterceptor {
           return data;
         }
 
-        // Trường hợp có data → gói trong `data`
+        // Trường hợp không có message, chỉ có data
         return {
           status: 200,
           message: 'Success',
-          data,
+          data: data,
         };
       }),
     );

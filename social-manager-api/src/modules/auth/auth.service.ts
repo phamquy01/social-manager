@@ -5,6 +5,7 @@ import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import { UserService } from 'src/modules/user/user.service';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { ApiResponse } from 'src/common/api-response';
 
 @Injectable()
 export class AuthService {
@@ -25,11 +26,14 @@ export class AuthService {
 
     await this.saveRefreshToken(refreshToken, user.id);
 
-    return {
-      accessToken,
-      refreshToken,
-      user: { ...userInfo, password: undefined },
-    };
+    return ApiResponse.success(
+      {
+        accessToken,
+        refreshToken,
+        user: userInfo,
+      },
+      'Login successful',
+    );
   }
 
   async saveRefreshToken(refreshToken: string, userId: number) {
